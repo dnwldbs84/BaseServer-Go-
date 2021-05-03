@@ -1,0 +1,21 @@
+[ERROR] 2021/04/30 19:12:52 CommonFuncs.go:73: ERR_PACKET_TYPE: 20 goroutine 7 [running]:
+runtime/debug.Stack(0xc0000a6090, 0xc000089140, 0x13)
+	c:/go/src/runtime/debug/stack.go:24 +0xa5
+main.HandleErr(0xb0dc20, 0xc0000a6090)
+	C:/Wallpaper/MyGame/Server/BasicServer/CommonFuncs.go:40 +0x67
+main.CommonHandler(0xb11f60, 0xc0000a20e0, 0xc0000b4000)
+	C:/Wallpaper/MyGame/Server/BasicServer/Server.go:45 +0x65c
+net/http.HandlerFunc.ServeHTTP(0xad0948, 0xb11f60, 0xc0000a20e0, 0xc0000b4000)
+	c:/go/src/net/http/server.go:2042 +0x4b
+net/http.(*ServeMux).ServeHTTP(0xc7f7e0, 0xb11f60, 0xc0000a20e0, 0xc0000b4000)
+	c:/go/src/net/http/server.go:2417 +0x1b7
+net/http.serverHandler.ServeHTTP(0xc0000a2000, 0xb11f60, 0xc0000a20e0, 0xc0000b4000)
+	c:/go/src/net/http/server.go:2843 +0xaa
+net/http.(*conn).serve(0xc000066c80, 0xb123e0, 0xc0000ac040)
+	c:/go/src/net/http/server.go:1925 +0x8ad
+created by net/http.(*Server).Serve
+	c:/go/src/net/http/server.go:2969 +0x36d
+
+[ERROR] 2021/04/30 19:12:52 CommonFuncs.go:73: 	Panic Recovered !!!
+[INFO] 2021/04/30 19:20:50 CommonFuncs.go:70:  Server Starting !!!
+[INFO] 2021/04/30 19:24:25 CommonFuncs.go:70:  Server Starting !!!

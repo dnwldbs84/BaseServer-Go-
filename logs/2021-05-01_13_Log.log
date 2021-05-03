@@ -1,0 +1,13 @@
+[INFO] 2021/05/01 13:12:21 CommonFuncs.go:70: json: cannot unmarshal string into Go struct field .Server.PORT of type int 
+
+ goroutine 1 [running]:
+runtime/debug.Stack(0x0, 0x0, 0x0)
+	c:/go/src/runtime/debug/stack.go:24 +0xac
+main.HandleErr(0xd5bf00, 0xc000052140)
+	c:/Wallpaper/MyGame/Server/BasicServer/CommonFuncs.go:39 +0x7c
+main.InitConfig()
+	c:/Wallpaper/MyGame/Server/BasicServer/CommonFuncs.go:24 +0x15e
+main.main()
+	c:/Wallpaper/MyGame/Server/BasicServer/Server.go:14 +0x45
+
+[INFO] 2021/05/01 13:12:53 CommonFuncs.go:70:  Server Starting !!!

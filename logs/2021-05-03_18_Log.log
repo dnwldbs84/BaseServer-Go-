@@ -1,0 +1,33 @@
+[ERROR] 2021/05/03 18:08:30 CommonFuncs.go:114: sql: Scan error on column index 9, name "test14": converting NULL to string is unsupported 
+
+ goroutine 1 [running]:
+runtime/debug.Stack(0x0, 0x0, 0x0)
+	c:/go/src/runtime/debug/stack.go:24 +0xac
+main.HandleErr(0xcf32c0, 0xc000047270)
+	c:/Wallpaper/MyGame/Server/BasicServer/CommonFuncs.go:81 +0x7c
+main.DBQuery(0xc0002fa1a0, 0xcc64d6, 0x17, 0x0, 0x0, 0x0)
+	c:/Wallpaper/MyGame/Server/BasicServer/CommonFuncs.go:172 +0xaad
+main.InitDB()
+	c:/Wallpaper/MyGame/Server/BasicServer/CommonFuncs.go:45 +0x42e
+main.main()
+	c:/Wallpaper/MyGame/Server/BasicServer/Server.go:18 +0x59
+
+[ERROR] 2021/05/03 18:12:35 CommonFuncs.go:114: sql: Scan error on column index 9, name "test24": unsupported Scan, storing driver.Value type []uint8 into type *time.Time 
+
+ goroutine 1 [running]:
+runtime/debug.Stack(0x0, 0x0, 0x0)
+	c:/go/src/runtime/debug/stack.go:24 +0xac
+main.HandleErr(0xcf32c0, 0xc000384120)
+	c:/Wallpaper/MyGame/Server/BasicServer/CommonFuncs.go:81 +0x7c
+main.DBQuery(0xc00005bd40, 0xcc64d6, 0x17, 0x0, 0x0, 0x0)
+	c:/Wallpaper/MyGame/Server/BasicServer/CommonFuncs.go:172 +0xaad
+main.InitDB()
+	c:/Wallpaper/MyGame/Server/BasicServer/CommonFuncs.go:45 +0x42e
+main.main()
+	c:/Wallpaper/MyGame/Server/BasicServer/Server.go:18 +0x59
+
+[INFO] 2021/05/03 18:17:39 CommonFuncs.go:112:  Server Starting !!!
+[INFO] 2021/05/03 18:36:54 CommonFuncs.go:112:  Server Starting !!!
+[INFO] 2021/05/03 18:48:54 CommonFuncs.go:111:  Server Starting !!!
+[INFO] 2021/05/03 18:50:11 CommonFuncs.go:111:  Server Starting !!!
+[INFO] 2021/05/03 18:57:52 CommonFuncs.go:112:  Server Starting !!!
