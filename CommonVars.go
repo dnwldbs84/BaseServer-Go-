@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/go-redis/redis"
 )
@@ -23,8 +24,6 @@ const (
 	EnumLogLevel_Info = EnumLogLevelValue(0)
 	EnumLogLevel_Err  = EnumLogLevelValue(1)
 
-	EnumErr_System = EnumErrValue(0)
-
 	EnumDBType_Byte   = EnumDBTypeValue(0)
 	EnumDBType_Int    = EnumDBTypeValue(1)
 	EnumDBType_Long   = EnumDBTypeValue(2)
@@ -32,6 +31,30 @@ const (
 	EnumDBType_Time   = EnumDBTypeValue(4)
 	EnumDBType_Float  = EnumDBTypeValue(5)
 	EnumDBType_Err    = EnumDBTypeValue(99)
+
+	EnumErr_System = EnumErrValue(0)
+	EnumErr_Cache  = EnumErrValue(1)
+
+	EnumSeqErr_Cache       = EnumSeqErrValue(0)
+	EnumSeqErr_InProgress  = EnumSeqErrValue(1)
+	EnumSeqErr_DuplRequest = EnumSeqErrValue(2)
+)
+
+// CS, SC Header
+const (
+	HeaderPacketType = "pt"
+	HeaderSequence   = "sq"
+	HeaderUID        = "u"
+	HeaderErrCode    = "e"
+)
+
+// Redis Key
+const (
+	RedisCommonTTL = time.Minute * 30
+	RedisSeqTTL    = time.Minute
+
+	RedisUserSeqKey  = "User:Seq:"
+	RedisUserInfoKey = "User:Info:"
 )
 
 var Config ConfigInfo

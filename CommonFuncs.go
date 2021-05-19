@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -65,14 +66,15 @@ func InitRedis() {
 	})
 
 	RedisContext = context.Background()
-	RedisClient.Set(RedisContext, "test", "asdfasdf", 10*time.Minute)
 }
 
+// 공용 오류 처리 함수
 func HandleErr(err error) {
 	if err != nil {
 		stack := string(debug.Stack())
 		WriteLog(EnumLogLevel_Err, err.Error(), "\n\n", stack)
 		if GlobalDB != nil {
+			// DB 로그
 			var queryStr []string
 			queryStr = append(queryStr,
 				"INSERT INTO tbl_error_log(err_msg, err_stack) VALUES('",
@@ -90,6 +92,7 @@ func HandleErr(err error) {
 	}
 }
 
+// 파일 오류 로그
 func WriteLog(level EnumLogLevelValue, args ...interface{}) {
 	t := time.Now()
 	fileName := t.Format("./logs/2006-01-02_15_Log.log")
@@ -132,6 +135,7 @@ func GetDBConnection(connStr string, maxConnCount int, idleConnCount int) (db *s
 	return
 }
 
+// 다중 row DB 처리 함수
 func DBQuery(db *sql.DB, query string, dbModel IDBModel) (result []IDBModel) {
 	rows, err := db.Query(query)
 	HandleErr(err)
@@ -209,6 +213,7 @@ func DBQuery(db *sql.DB, query string, dbModel IDBModel) (result []IDBModel) {
 	return result
 }
 
+// 단일 row DB 처리 함수
 func DBQueryRow(db *sql.DB, query string, dbModel IDBModel) {
 	rows, err := db.Query(query)
 	HandleErr(err)
@@ -299,4 +304,76 @@ func DBTypeToGoType(dbType string) EnumDBTypeValue {
 		HandleErr(errors.New("Can`t find proper DBType: " + dbType))
 		return EnumDBType_Err
 	}
+}
+
+func GetRedisSequenceKey(uid int64) string {
+	return RedisUserSeqKey + strconv.FormatInt(uid, 64)
+}
+
+// 로그인 패킷에서 최초로 Sequence 값 Set
+func InitUserSequence(redisClient *redis.Client, uid int64, initNum int, packetType EnumPacketValue) (seq int, resVal []byte, seqErrCode EnumSeqErrValue) {
+	redisKey := GetRedisSequenceKey(uid)
+	seq = (initNum % 100) * 1000000
+
+	beforeSeqInfo := RedisSeqInfo{}
+	curSeqInfo := RedisSeqInfo{seq, []byte{}}
+
+	beforeSeqVal, err := redisClient.GetSet(RedisContext, redisKey, RedisSeqInfo{seq + 1, []byte{}}).Result()
+	if err == redis.Nil {
+		curSeqInfo.Seq = -1
+	} else {
+		HandleErr(err)
+	}
+	err = json.Unmarshal([]byte(beforeSeqVal), &beforeSeqInfo)
+	HandleErr(err)
+
+	if beforeSeqInfo.Seq == curSeqInfo.Seq+1 { // 진행 도중인 요청
+		err = redisClient.Expire(RedisContext, redisKey, time.Second*10).Err()
+		HandleErr(err)
+		seqErrCode = EnumSeqErr_InProgress
+		return
+	} else if beforeSeqInfo.Seq == curSeqInfo.Seq+2 { // 완료된 요청
+		err = redisClient.Set(RedisContext, redisKey, beforeSeqVal, time.Second*10).Err()
+		HandleErr(err)
+		resVal = beforeSeqInfo.ResVal
+		seqErrCode = EnumSeqErr_DuplRequest
+	}
+	return
+}
+
+func CheckSequence(redisClient *redis.Client, uid int64, cSeq int) (resVal []byte, seqErrCode EnumSeqErrValue) {
+	redisKey := GetRedisSequenceKey(uid)
+
+	var seqInfo RedisSeqInfo
+	beforeSeqVal, err := redisClient.GetSet(RedisContext, redisKey, RedisSeqInfo{cSeq + 1, []byte{}}).Result()
+	HandleErr(err)
+
+	err = json.Unmarshal([]byte(beforeSeqVal), &seqInfo)
+	HandleErr(err)
+	if seqInfo.Seq+1 == cSeq { // 정상
+		return
+	}
+
+	if seqInfo.Seq == cSeq+2 { // 요청이 완료된 상태에서의 재요청
+		// 기존 값 되돌림
+		err = redisClient.Set(RedisContext, redisKey, beforeSeqVal, 0).Err()
+		HandleErr(err)
+		// 응답 값 셋팅
+		seqErrCode = EnumSeqErr_DuplRequest
+		resVal = seqInfo.ResVal
+	} else if seqInfo.Seq == cSeq+1 { // 요청이 진행 중인 상태에서의 재요청
+		seqErrCode = EnumSeqErr_InProgress
+		return
+	} else {
+		HandleErr(fmt.Errorf("%s - [seqInfo]%+v - [cSeq]%d", "Check sequence error ", seqInfo, cSeq))
+	}
+	return
+}
+
+func UpdateSequence(redisClient *redis.Client, uid int64, cSeq int, resVal *[]byte) {
+	redisKey := GetRedisSequenceKey(uid)
+
+	seqInfo := RedisSeqInfo{cSeq + 2, *resVal}
+	err := redisClient.Set(RedisContext, redisKey, seqInfo, RedisSeqTTL).Err()
+	HandleErr(err)
 }

@@ -1,8 +1,9 @@
 package main
 
+type EnumDBTypeValue int
 type EnumLogLevelValue int
 type EnumErrValue int
-type EnumDBTypeValue int
+type EnumSeqErrValue int
 
 type ConfigInfo struct {
 	Server struct {
@@ -20,4 +21,9 @@ type ConfigInfo struct {
 		Addr     string
 		Password string
 	}
+}
+
+type RedisSeqInfo struct {
+	Seq    int
+	ResVal []byte
 }
